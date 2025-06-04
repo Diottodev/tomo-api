@@ -6,7 +6,7 @@ Microserviço de autenticação desenvolvido com Fastify, Knex.js, PostgreSQL, J
 
 ## Descrição
 
-Este projeto implementa uma API para registro e autenticação de usuários, utilizando boas práticas como arquitetura DDD, testes com Jest, documentação com Fumadocs e segurança com JWT.
+Este projeto implementa uma API para registro e autenticação de usuários, utilizando boas práticas como arquitetura DDD, testes com Jest, documentação com Swagger e segurança com JWT.
 
 ---
 

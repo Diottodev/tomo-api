@@ -1,9 +1,17 @@
-module.exports = {
+import type { Knex } from 'knex';
+import dotenv from 'dotenv';
+import { env } from '../../env';
+
+dotenv.config();
+
+const config: { [key: string]: Knex.Config } = {
   development: {
     client: 'pg',
-    connection: process.env.DATABASE_URL,
+    connection: env.databaseUrl,
     migrations: {
-      directory: './src/infra/db/migrations',
+      directory: './migrations',
     },
   },
 };
+
+export default config;

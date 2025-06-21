@@ -1,6 +1,6 @@
 # 🧪 Testing Guide
 
-Este projeto implementa uma estratégia abrangente de testes seguindo as melhores práticas de desenvolvimento sênior.
+Este projeto implementa uma estratégia abrangente de testes seguindo as melhores práticas de desenvolvimento.
 
 ## 📋 Tipos de Testes
 

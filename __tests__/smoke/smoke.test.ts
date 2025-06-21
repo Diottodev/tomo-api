@@ -25,7 +25,7 @@ describe('Smoke Tests', () => {
 
     it('should have all required routes registered', async () => {
       const routes = app.printRoutes();
-      
+
       expect(routes).toContain('register (POST)');
       expect(routes).toContain('login (POST)');
       expect(routes).toContain('profile (GET');

@@ -106,7 +106,7 @@ describe('Auth Integration Tests', () => {
       );
 
       const responses = await Promise.all(requests);
-      
+
       // At least one should succeed (201), others might fail (409) or succeed depending on timing
       const successfulRegistrations = responses.filter((r) => r.statusCode === 201);
       const failedRegistrations = responses.filter((r) => r.statusCode === 409);

@@ -26,9 +26,9 @@ describe('Performance Tests', () => {
   describe('Response Time Tests', () => {
     it('should register user within acceptable time limit', async () => {
       const startTime = Date.now();
-      
+
       const response = await registerUser(app, validUser);
-      
+
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
@@ -38,11 +38,11 @@ describe('Performance Tests', () => {
 
     it('should login user within acceptable time limit', async () => {
       await registerUser(app, validUser);
-      
+
       const startTime = Date.now();
-      
+
       const response = await loginUser(app, validUser);
-      
+
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
@@ -100,20 +100,20 @@ describe('Performance Tests', () => {
   describe('Memory and Resource Tests', () => {
     it('should handle sequential operations without memory leaks', async () => {
       const iterations = 20;
-      
+
       for (let i = 0; i < iterations; i++) {
         const user = {
           email: `sequential-user-${i}@test.com`,
           password: 'TestPass123!',
         };
-        
+
         const registerResponse = await registerUser(app, user);
         expect(registerResponse.statusCode).toBe(201);
-        
+
         const loginResponse = await loginUser(app, user);
         expect(loginResponse.statusCode).toBe(200);
       }
-      
+
       // If we reach here without timeout, memory usage is likely stable
       expect(true).toBe(true);
     });

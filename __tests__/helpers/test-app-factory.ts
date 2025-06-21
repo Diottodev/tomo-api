@@ -20,7 +20,7 @@ export async function setupTestDatabase(): Promise<void> {
   try {
     // Ensure migrations are run
     await testDb.migrate.latest();
-    
+
     // Verify the users table exists
     const hasUsersTable = await testDb.schema.hasTable('users');
     if (!hasUsersTable) {

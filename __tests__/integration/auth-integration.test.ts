@@ -108,9 +108,8 @@ describe('Auth Integration Tests', () => {
       const responses = await Promise.allSettled(requests);
 
       // Filter only fulfilled promises
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fulfilledResponses = responses
-        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+        .filter((result): result is PromiseFulfilledResult<Awaited<ReturnType<typeof registerUser>>> => result.status === 'fulfilled')
         .map((result) => result.value);
 
       // Count status codes

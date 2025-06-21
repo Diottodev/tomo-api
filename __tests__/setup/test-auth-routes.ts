@@ -90,7 +90,7 @@ export function createTestAuthRoutes(dbInstance: Knex) {
             });
             return;
           }
-          const token = app.jwt.sign({ userId: user.id });
+          const token = app.jwt.sign({ sub: user.id });
           reply.send({
             token,
             user,

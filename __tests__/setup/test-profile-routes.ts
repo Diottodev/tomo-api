@@ -8,8 +8,8 @@ export function createTestProfileRoutes(dbInstance: Knex) {
     app.get('/profile', {
       preHandler: [authMiddleware],
       handler: async (request, reply) => {
-        const tokenPayload = request.user as { userId: string };
-        const userId = tokenPayload?.userId;
+        const tokenPayload = request.user as { sub: string };
+        const userId = tokenPayload?.sub;
         if (!userId) {
           reply.status(401).send({ message: 'Unauthorized' });
           return;

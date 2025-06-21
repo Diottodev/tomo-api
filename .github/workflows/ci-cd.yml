@@ -14,20 +14,6 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
 
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: tomo_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -40,6 +26,9 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+      env:
+        # SQLite compilation flags for CI
+        SQLITE_CLI_TMPDIR: /tmp
 
     - name: Run linting
       run: npm run lint
@@ -51,25 +40,29 @@ jobs:
       run: npm test
       env:
         NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tomo_test
+        JWT_SECRET: test-secret-key-for-ci
+        CI: true
 
     - name: Run integration tests
       run: npm run test:integration
       env:
         NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tomo_test
+        JWT_SECRET: test-secret-key-for-ci
+        CI: true
 
     - name: Run performance tests
       run: npm run test:performance
       env:
         NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tomo_test
+        JWT_SECRET: test-secret-key-for-ci
+        CI: true
 
     - name: Generate test coverage
       run: npm run test:coverage
       env:
         NODE_ENV: test
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/tomo_test
+        JWT_SECRET: test-secret-key-for-ci
+        CI: true
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

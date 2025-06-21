@@ -19,13 +19,14 @@ const config: Config = {
       statements: 80,
     },
   },
-  testTimeout: 10000,
-  maxWorkers: 1, // Run tests sequentially to avoid database race conditions
+  testTimeout: 15000, // Increased for CI environments
+  maxWorkers: process.env.CI ? 1 : '50%', // Sequential in CI, parallel locally
   clearMocks: true,
   restoreMocks: true,
   verbose: true,
-  bail: false,
+  bail: process.env.CI ? 1 : false, // Stop on first failure in CI
   errorOnDeprecated: true,
+  forceExit: process.env.CI ? true : false, // Force exit in CI
 };
 
 export default config;

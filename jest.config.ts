@@ -19,7 +19,7 @@ const config: Config = {
       statements: 80,
     },
   },
-  testTimeout: 15000, // Increased for CI environments
+  testTimeout: process.env.CI ? 30000 : 15000, // Increased timeout for CI environments
   maxWorkers: process.env.CI ? 1 : '50%', // Sequential in CI, parallel locally
   clearMocks: true,
   restoreMocks: true,
@@ -27,6 +27,7 @@ const config: Config = {
   bail: process.env.CI ? 1 : false, // Stop on first failure in CI
   errorOnDeprecated: true,
   forceExit: true,
+  detectOpenHandles: true, // Detect handles that prevent Jest from exiting
 };
 
 export default config;

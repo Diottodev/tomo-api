@@ -109,7 +109,10 @@ describe('Auth Integration Tests', () => {
 
       // Filter only fulfilled promises
       const fulfilledResponses = responses
-        .filter((result): result is PromiseFulfilledResult<Awaited<ReturnType<typeof registerUser>>> => result.status === 'fulfilled')
+        .filter(
+          (result): result is PromiseFulfilledResult<Awaited<ReturnType<typeof registerUser>>> =>
+            result.status === 'fulfilled'
+        )
         .map((result) => result.value);
 
       // Count status codes

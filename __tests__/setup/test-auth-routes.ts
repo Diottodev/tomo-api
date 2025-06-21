@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import '@fastify/jwt'; // Import to augment FastifyInstance with jwt
+import '@fastify/jwt';
 import { registerUser } from '../../src/app/use-cases/register-user';
 import { authenticateUser } from '../../src/app/use-cases/authenticate-user';
 import {

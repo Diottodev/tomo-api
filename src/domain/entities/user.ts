@@ -1,4 +1,6 @@
-﻿export interface User {
+﻿import { randomUUID } from 'crypto';
+
+export interface User {
   readonly id: string;
   readonly email: string;
   readonly passwordHash: string;
@@ -45,7 +47,7 @@ export class UserEntity {
   }
 
   static create(email: string, passwordHash: string, id?: string): UserEntity {
-    return new UserEntity(id || crypto.randomUUID(), email, passwordHash, new Date());
+    return new UserEntity(id || randomUUID(), email, passwordHash, new Date());
   }
 
   static fromPersistence(data: User): UserEntity {

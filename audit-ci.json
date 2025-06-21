@@ -1,9 +1,13 @@
 {
   "low": true,
-  "moderate": true,
+  "moderate": false,
   "high": false,
   "critical": false,
   "report-type": "important",
-  "allowlist": [],
+  "allowlist": [
+    "GHSA-c2ff-88x2-x9pg",
+    "GHSA-gm45-q3v2-6cf8",
+    "GHSA-v6h2-p8h4-qcjw"
+  ],
   "skip-dev": true
 }

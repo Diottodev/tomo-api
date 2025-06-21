@@ -36,12 +36,31 @@ export function createTestAuthRoutes(dbInstance: Knex) {
       },
       handler: async (request, reply) => {
         try {
+          // Debug logging for CI
+          if (process.env.CI) {
+            console.log('Register handler - Environment:', {
+              NODE_ENV: process.env.NODE_ENV,
+              DATABASE_URL: process.env.DATABASE_URL,
+              JWT_SECRET: process.env.JWT_SECRET ? '[REDACTED]' : 'MISSING',
+              dbInstance: !!dbInstance,
+            });
+          }
+
           const user = await registerUser(request.body as AuthInput, dbInstance);
           reply.status(201).send({
             message: 'User created successfully',
             user,
           });
         } catch (error: unknown) {
+          // Enhanced error logging for CI
+          if (process.env.CI) {
+            console.error('Register handler error:', {
+              error: error instanceof Error ? error.message : String(error),
+              stack: error instanceof Error ? error.stack : undefined,
+              body: request.body,
+            });
+          }
+
           if (error instanceof ZodError) {
             const errors = error.errors.map((err) => `${err.path.join('.')}: ${err.message}`);
             reply.status(400).send({

@@ -18,6 +18,16 @@ export async function createTestApp(): Promise<FastifyInstance> {
 
 export async function setupTestDatabase(): Promise<void> {
   try {
+    // Debug logging for CI
+    if (process.env.CI) {
+      console.log('Setting up test database:', {
+        NODE_ENV: process.env.NODE_ENV,
+        DATABASE_URL: process.env.DATABASE_URL,
+        dbClient: testDb.client.config.client,
+        dbConnection: testDb.client.config.connection,
+      });
+    }
+
     // Ensure migrations are run
     await testDb.migrate.latest();
 
@@ -25,6 +35,10 @@ export async function setupTestDatabase(): Promise<void> {
     const hasUsersTable = await testDb.schema.hasTable('users');
     if (!hasUsersTable) {
       throw new Error('Users table not created after migration');
+    }
+
+    if (process.env.CI) {
+      console.log('Test database setup completed successfully');
     }
   } catch (error) {
     console.error('Error setting up test database:', error);

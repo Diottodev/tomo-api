@@ -26,6 +26,7 @@ const config: Config = {
   verbose: true,
   bail: process.env.CI ? 1 : false, // Stop on first failure in CI
   errorOnDeprecated: true,
+  forceExit: true,
 };
 
 export default config;

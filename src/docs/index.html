@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tomo API - Documentação</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: #f7fafc;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 60px 0 40px;
+            border-bottom: 1px solid #e2e8f0;
+            background: white;
+            margin-bottom: 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1a202c;
+            letter-spacing: -0.025em;
+        }
+        .header p {
+            font-size: 1.125rem;
+            color: #718096;
+            font-weight: 400;
+        }
+        .content {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            margin-top: 24px;
+        }
+        .nav-tabs {
+            display: flex;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .nav-tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #718096;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-tab:hover {
+            background: #edf2f7;
+            color: #4a5568;
+        }
+        .nav-tab.active {
+            border-bottom-color: #2d3748;
+            background: white;
+            color: #1a202c;
+        }
+        .tab-content {
+            padding: 32px;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+        .endpoint {
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .endpoint-header {
+            background: #f7fafc;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .endpoint-method {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            margin-right: 12px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+        .method-post {
+            background: #38a169;
+            color: white;
+        }
+        .method-get {
+            background: #3182ce;
+            color: white;
+        }
+        .endpoint-path {
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-weight: 600;
+            font-size: 1rem;
+            color: #2d3748;
+        }
+        .endpoint-body {
+            padding: 20px;
+        }
+        .code-block {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            font-size: 0.875rem;
+            margin: 16px 0;
+            overflow-x: auto;
+            color: #2d3748;
+        }
+        .auth-guide {
+            background: #edf2f7;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        .auth-guide h2 {
+            color: #1a202c;
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .auth-guide p {
+            color: #4a5568;
+        }
+        .auth-step {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            border-left: 4px solid #4a5568;
+        }
+        .auth-step h4 {
+            margin-bottom: 8px;
+            color: #1a202c;
+            font-weight: 600;
+        }
+        .auth-step p {
+            color: #718096;
+            margin-bottom: 12px;
+        }
+        .password-requirements {
+            background: #fffbeb;
+            border: 1px solid #fbbf24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .password-requirements h4 {
+            color: #92400e;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .password-requirements ul {
+            margin-left: 20px;
+            color: #92400e;
+        }
+        .response-codes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .response-code {
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        .code-200 { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; }
+        .code-201 { background: #f0fff4; color: #22543d; border: 1px solid #9ae6b4; }
+        .code-400 { background: #fed7d7; color: #742a2a; border: 1px solid #fc8181; }
+        .code-401 { background: #fed7d7; color: #742a2a; border: 1px solid #fc8181; }
+        .code-409 { background: #fed7d7; color: #742a2a; border: 1px solid #fc8181; }
+        .example-section {
+            margin: 24px 0;
+        }
+        .example-section h3 {
+            margin-bottom: 16px;
+            color: #1a202c;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        .example-section h4 {
+            margin-bottom: 12px;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .footer {
+            text-align: center;
+            padding: 48px 0;
+            color: #718096;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 32px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tomo API</h1>
+            <p>API de Autenticação Segura com JWT</p>
+        </div>
+
+        <div class="content">
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('auth-guide')">Guia de Autenticação</button>
+                <button class="nav-tab" onclick="showTab('endpoints')">Endpoints</button>
+                <button class="nav-tab" onclick="showTab('examples')">Exemplos</button>
+            </div>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="auth-guide">
+                    <div class="auth-guide">
+                        <h2>Como Autenticar no Frontend</h2>
+                        <p>Siga estes passos para integrar a autenticação em sua aplicação frontend:</p>
+                    </div>
+
+                    <div class="auth-step">
+                        <h4>1. Registro de Usuário</h4>
+                        <p>Faça uma requisição POST para <code>/register</code> com email e senha que atendam aos requisitos.</p>
+                        <div class="code-block">
+POST /register
+Content-Type: application/json
+
+{
+  "email": "usuario@exemplo.com",
+  "password": "MinhaSenh@123"
+}
+                        </div>
+                    </div>
+
+                    <div class="auth-step">
+                        <h4>2. Login e Obtenção do Token</h4>
+                        <p>Faça login para receber o token JWT que será usado nas próximas requisições.</p>
+                        <div class="code-block">
+POST /login
+Content-Type: application/json
+
+{
+  "email": "usuario@exemplo.com", 
+  "password": "MinhaSenh@123"
+}
+
+// Resposta:
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "uuid",
+    "email": "usuario@exemplo.com"
+  }
+}
+                        </div>
+                    </div>
+
+                    <div class="auth-step">
+                        <h4>3. Armazenar Token no Frontend</h4>
+                        <p>Salve o token de forma segura (localStorage, sessionStorage, ou cookie httpOnly).</p>
+                        <div class="code-block">
+// JavaScript/TypeScript
+localStorage.setItem('authToken', response.token);
+
+// React (usando Context/State)
+setUser(response.user);
+setToken(response.token);
+                        </div>
+                    </div>
+
+                    <div class="auth-step">
+                        <h4>4. Usar Token em Requisições Protegidas</h4>
+                        <p>Inclua o token no header Authorization de todas as requisições protegidas.</p>
+                        <div class="code-block">
+// Fetch API
+fetch('/profile', {
+  headers: {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+// Axios
+axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                        </div>
+                    </div>
+
+                    <div class="password-requirements">
+                        <h4>Requisitos de Senha</h4>
+                        <ul>
+                            <li>Mínimo de 8 caracteres</li>
+                            <li>Pelo menos 1 letra maiúscula</li>
+                            <li>Pelo menos 1 número</li>
+                            <li>Pelo menos 1 caractere especial (!@#$%^&* etc.)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="endpoints">
+                    <h2>Endpoints Disponíveis</h2>
+
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/register</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p><strong>Descrição:</strong> Registra um novo usuário no sistema</p>
+                            
+                            <div class="example-section">
+                                <h4>Body (JSON):</h4>
+                                <div class="code-block">
+{
+  "email": "string (email válido)",
+  "password": "string (requisitos de segurança)"
+}
+                                </div>
+                            </div>
+
+                            <div class="response-codes">
+                                <div class="response-code code-201">201 - Usuário criado</div>
+                                <div class="response-code code-400">400 - Dados inválidos</div>
+                                <div class="response-code code-409">409 - Usuário já existe</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-post">POST</span>
+                            <span class="endpoint-path">/login</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p><strong>Descrição:</strong> Autentica usuário e retorna token JWT</p>
+                            
+                            <div class="example-section">
+                                <h4>Body (JSON):</h4>
+                                <div class="code-block">
+{
+  "email": "string",
+  "password": "string"
+}
+                                </div>
+                            </div>
+
+                            <div class="response-codes">
+                                <div class="response-code code-200">200 - Login realizado</div>
+                                <div class="response-code code-400">400 - Dados inválidos</div>
+                                <div class="response-code code-401">401 - Credenciais inválidas</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="endpoint-method method-get">GET</span>
+                            <span class="endpoint-path">/profile</span>
+                        </div>
+                        <div class="endpoint-body">
+                            <p><strong>Descrição:</strong> Retorna dados do usuário autenticado</p>
+                            <p><strong>Autenticação:</strong> Requer token JWT no header Authorization</p>
+                            
+                            <div class="example-section">
+                                <h4>Headers:</h4>
+                                <div class="code-block">
+Authorization: Bearer {seu_token_jwt}
+                                </div>
+                            </div>
+
+                            <div class="response-codes">
+                                <div class="response-code code-200">200 - Dados do usuário</div>
+                                <div class="response-code code-401">401 - Token inválido/ausente</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-pane" id="examples">
+                    <h2>Exemplos Práticos</h2>
+
+                    <div class="example-section">
+                        <h3>React + Axios</h3>
+                        <div class="code-block">
+import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:8080'
+});
+
+// Interceptor para adicionar token automaticamente
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Registro
+const register = async (email, password) => {
+  try {
+    const response = await api.post('/register', { email, password });
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+// Login
+const login = async (email, password) => {
+  try {
+    const response = await api.post('/login', { email, password });
+    localStorage.setItem('authToken', response.data.token);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+// Buscar perfil
+const getProfile = async () => {
+  try {
+    const response = await api.get('/profile');
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <h3>Vanilla JavaScript</h3>
+                        <div class="code-block">
+// Função para fazer login
+async function login(email, password) {
+  try {
+    const response = await fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!response.ok) {
+      throw new Error('Login failed');
+    }
+
+    const data = await response.json();
+    localStorage.setItem('authToken', data.token);
+    return data;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
+  }
+}
+
+// Função para acessar rota protegida
+async function getProfile() {
+  const token = localStorage.getItem('authToken');
+  
+  try {
+    const response = await fetch('/profile', {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to get profile');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Profile error:', error);
+    throw error;
+  }
+}
+                        </div>
+                    </div>
+
+                    <div class="example-section">
+                        <h3>Tratamento de Erros</h3>
+                        <div class="code-block">
+// Exemplo de tratamento de erros de validação
+try {
+  await register(email, password);
+} catch (error) {
+  if (error.status === 400) {
+    // Erro de validação
+    console.log('Erros de validação:', error.errors);
+    error.errors.forEach(err => {
+      console.log(err); // "password: Senha deve conter pelo menos uma letra maiúscula"
+    });
+  } else if (error.status === 409) {
+    // Usuário já existe
+    console.log('Usuário já cadastrado');
+  }
+}
+
+// Exemplo de verificação de token expirado
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token inválido ou expirado
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Tomo API - Autenticação Segura | Desenvolvido por <a href="https://github.com/DiottoDev" target="_blank" style="color: #4a5568; text-decoration: none;">DiottoDev</a></p>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            // Esconder todas as tabs
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            
+            // Remover classe active de todos os botões
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar tab selecionada
+            document.getElementById(tabId).classList.add('active');
+            
+            // Adicionar classe active ao botão clicado
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

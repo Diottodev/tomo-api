@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+﻿import type { FastifyInstance } from 'fastify';
 import { registerUser } from '../../../app/use-cases/register-user';
 import { authenticateUser } from '../../../app/use-cases/authenticate-user';
 import { authSchema, loginResponseSchema, registerResponseSchema } from '../../../schemas/auth';
@@ -89,3 +89,4 @@ export async function authRoutes(app: FastifyInstance) {
     },
   });
 }
+// Test comment

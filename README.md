@@ -1,4 +1,4 @@
-# 🔐 Tomo Auth API
+﻿# 🔐 Tomo Auth API
 
 API de Autenticação Segura com validação rigorosa de senhas e documentação interativa.
 

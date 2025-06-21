@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify';
+﻿import type { FastifyInstance } from 'fastify';
 import { authMiddleware, getUserFromToken } from '../middlewares/auth';
 
 export async function profileRoutes(app: FastifyInstance) {

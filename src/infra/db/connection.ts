@@ -1,4 +1,4 @@
-import knex from 'knex';
+﻿import knex from 'knex';
 import { env } from '../../env';
 
 export const db = knex({

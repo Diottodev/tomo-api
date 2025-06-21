@@ -1,4 +1,4 @@
-import Fastify from 'fastify';
+﻿import Fastify from 'fastify';
 import { authRoutes } from './routes/auth';
 import { profileRoutes } from './routes/profile';
 import jwtPlugin from '../plugins/jwt';

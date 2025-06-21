@@ -1,4 +1,4 @@
-import fp from 'fastify-plugin';
+﻿import fp from 'fastify-plugin';
 import * as jwtPlugin from '@fastify/jwt';
 import { env } from '../../env';
 

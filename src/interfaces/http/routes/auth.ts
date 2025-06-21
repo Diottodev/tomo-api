@@ -15,15 +15,15 @@ export async function authRoutes(app: FastifyInstance) {
         const user = await registerUser(userData);
         return ApiResponse.success(reply, { user }, 'User created successfully', 201);
       } catch (error) {
+        if (error instanceof Error && error.message === 'User already exists') {
+          return ApiResponse.conflict(reply, 'User already exists');
+        }
         if (error instanceof ZodError) {
           const formattedErrors = error.errors.map((e) => {
             const field = e.path.join('.');
             const message = e.message;
             return `${field}: ${message}`;
           });
-          if (error instanceof Error && error.message === 'User already exists') {
-            return ApiResponse.conflict(reply, 'User already exists');
-          }
           return ApiResponse.validationError(reply, formattedErrors, {
             passwordRequirements: [
               'Minimum 8 characters',

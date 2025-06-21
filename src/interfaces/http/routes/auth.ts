@@ -1,31 +1,11 @@
 ﻿import type { FastifyInstance } from 'fastify';
 import { registerUser } from '../../../app/use-cases/register-user';
 import { authenticateUser } from '../../../app/use-cases/authenticate-user';
-import { authSchema, loginResponseSchema, registerResponseSchema } from '../../../schemas/auth';
-import { zodToFastifySchema } from '../../../utils/validation';
+import { authSchema } from '../../../schemas/auth';
 import { ZodError } from 'zod';
 
 export async function authRoutes(app: FastifyInstance) {
   app.post('/register', {
-    schema: {
-      body: zodToFastifySchema(authSchema),
-      response: {
-        201: zodToFastifySchema(registerResponseSchema),
-        400: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-            errors: { type: 'array', items: { type: 'string' } },
-          },
-        },
-        409: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-          },
-        },
-      },
-    },
     handler: async (request, reply) => {
       try {
         const userData = authSchema.parse(request.body);
@@ -63,25 +43,6 @@ export async function authRoutes(app: FastifyInstance) {
     },
   });
   app.post('/login', {
-    schema: {
-      body: zodToFastifySchema(authSchema),
-      response: {
-        200: zodToFastifySchema(loginResponseSchema),
-        400: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-            errors: { type: 'array', items: { type: 'string' } },
-          },
-        },
-        401: {
-          type: 'object',
-          properties: {
-            message: { type: 'string' },
-          },
-        },
-      },
-    },
     handler: async (request, reply) => {
       try {
         const userData = authSchema.parse(request.body);

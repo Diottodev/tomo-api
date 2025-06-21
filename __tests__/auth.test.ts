@@ -1,4 +1,4 @@
-﻿import { FastifyInstance } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import {
   createTestApp,
   setupTestDatabase,
@@ -41,10 +41,12 @@ describe('Auth Routes', () => {
 
       const body = JSON.parse(response.body);
       expect(body.message).toBe('User created successfully');
+      expect(body.user).toBeDefined();
       expect(body.user).toMatchObject({
         email: validUser.email,
       });
       expect(body.user.id).toBeDefined();
+      expect(body.user.passwordHash).toBeUndefined(); // Ensure password is not exposed
     });
 
     it('should fail with invalid email format', async () => {
@@ -81,7 +83,47 @@ describe('Auth Routes', () => {
       expect(response.statusCode).toBe(409);
 
       const body = JSON.parse(response.body);
+      expect(body.error).toBe('CONFLICT');
       expect(body.message).toBe('User already exists');
+    });
+
+    it('should fail with missing email field', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/register',
+        payload: { password: 'TestPass123!' },
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('email');
+    });
+
+    it('should fail with missing password field', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/register',
+        payload: { email: 'test@example.com' },
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('password');
+    });
+
+    it('should fail with empty body', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/register',
+        payload: {},
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toBeDefined();
     });
   });
 
@@ -93,22 +135,77 @@ describe('Auth Routes', () => {
       expect(response.statusCode).toBe(200);
 
       const body = JSON.parse(response.body);
-      expect(body.token).toBeDefined();
-      expect(body.user).toMatchObject({
+      expect(body.data.token).toBeDefined();
+      expect(body.data.user).toMatchObject({
         email: validUser.email,
       });
+      expect(body.data.user.id).toBeDefined();
+      expect(body.data.user.passwordHash).toBeUndefined(); // Ensure password is not exposed
     });
 
     it('should fail with invalid credentials', async () => {
+      await registerUser(app, validUser);
       const response = await loginUser(app, {
         email: validUser.email,
         password: 'wrongpassword',
+      });
+
+      expect(response.statusCode).toBe(401);
+
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('UNAUTHORIZED');
+      expect(body.message).toBe('Invalid credentials. Please check your email and password.');
+    });
+
+    it('should fail with non-existent user', async () => {
+      const response = await loginUser(app, {
+        email: 'nonexistent@example.com',
+        password: 'TestPass123!',
+      });
+
+      expect(response.statusCode).toBe(401);
+
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('UNAUTHORIZED');
+      expect(body.message).toBe('Invalid credentials. Please check your email and password.');
+    });
+
+    it('should fail with missing email field', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/login',
+        payload: { password: 'TestPass123!' },
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('email');
+    });
+
+    it('should fail with missing password field', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/login',
+        payload: { email: 'test@example.com' },
       });
 
       expect(response.statusCode).toBe(400);
 
       const body = JSON.parse(response.body);
       expect(body.message).toContain('password');
+    });
+
+    it('should fail with invalid email format in login', async () => {
+      const response = await loginUser(app, {
+        email: 'invalid-email',
+        password: 'TestPass123!',
+      });
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('email');
     });
   });
 
@@ -120,9 +217,11 @@ describe('Auth Routes', () => {
       expect(response.statusCode).toBe(200);
 
       const body = JSON.parse(response.body);
-      expect(body.user).toMatchObject({
+      expect(body.data.user).toMatchObject({
         email: validUser.email,
       });
+      expect(body.data.user.id).toBeDefined();
+      expect(body.data.user.passwordHash).toBeUndefined(); // Ensure password is not exposed
     });
 
     it('should fail to access protected route without token', async () => {
@@ -131,7 +230,38 @@ describe('Auth Routes', () => {
       expect(response.statusCode).toBe(401);
 
       const body = JSON.parse(response.body);
+      expect(body.error).toBe('UNAUTHORIZED');
       expect(body.message).toBe('Unauthorized');
+    });
+
+    it('should fail with invalid token', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/profile',
+        headers: {
+          authorization: 'Bearer invalid-token',
+        },
+      });
+
+      expect(response.statusCode).toBe(401);
+
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('UNAUTHORIZED');
+    });
+
+    it('should fail with malformed authorization header', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/profile',
+        headers: {
+          authorization: 'InvalidFormat token',
+        },
+      });
+
+      expect(response.statusCode).toBe(401);
+
+      const body = JSON.parse(response.body);
+      expect(body.error).toBe('UNAUTHORIZED');
     });
   });
 });

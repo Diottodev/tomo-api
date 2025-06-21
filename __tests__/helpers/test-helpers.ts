@@ -7,12 +7,10 @@ export interface TestUser {
 
 export interface AuthResponse {
   message?: string;
-  data: {
-    token: string;
-    user: {
-      id: string;
-      email: string;
-    };
+  token: string;
+  user: {
+    id: string;
+    email: string;
   };
 }
 
@@ -76,5 +74,5 @@ export async function createUserAndGetToken(
   await registerUser(app, user);
   const loginRes = await loginUser(app, user);
   const response = JSON.parse(loginRes.body) as AuthResponse;
-  return response.data.token;
+  return response.token;
 }

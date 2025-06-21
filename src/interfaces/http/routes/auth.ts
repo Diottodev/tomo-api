@@ -89,4 +89,3 @@ export async function authRoutes(app: FastifyInstance) {
     },
   });
 }
-// Test comment

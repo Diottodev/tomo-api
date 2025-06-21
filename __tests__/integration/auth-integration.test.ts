@@ -106,11 +106,12 @@ describe('Auth Integration Tests', () => {
       );
 
       const responses = await Promise.allSettled(requests);
-      
+
       // Filter only fulfilled promises
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fulfilledResponses = responses
         .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
-        .map(result => result.value);
+        .map((result) => result.value);
 
       // Count status codes
       const successfulRegistrations = fulfilledResponses.filter((r) => r.statusCode === 201);
@@ -119,12 +120,13 @@ describe('Auth Integration Tests', () => {
 
       // At least one should succeed
       expect(successfulRegistrations.length).toBeGreaterThanOrEqual(1);
-      
+
       // Allow for server errors during concurrent operations (database conflicts)
       // This is expected behavior when multiple requests try to insert the same data simultaneously
-      const totalValidResponses = successfulRegistrations.length + conflictErrors.length + serverErrors.length;
+      const totalValidResponses =
+        successfulRegistrations.length + conflictErrors.length + serverErrors.length;
       expect(totalValidResponses).toBe(fulfilledResponses.length);
-      
+
       // Ensure we have at least some responses
       expect(fulfilledResponses.length).toBeGreaterThanOrEqual(1);
     });

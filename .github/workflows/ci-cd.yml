@@ -43,8 +43,6 @@ jobs:
 
     - name: Run linting
       run: npm run lint
-      env:
-        ESLINT_USE_FLAT_CONFIG: false
 
     - name: Run type checking
       run: npm run type-check

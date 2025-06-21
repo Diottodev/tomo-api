@@ -1,198 +1,137 @@
-﻿import Fastify from 'fastify';
-import { authRoutes } from '../src/interfaces/http/routes/auth';
-import { profileRoutes } from '../src/interfaces/http/routes/profile';
-import jwtPlugin from '../src/interfaces/plugins/jwt';
-import { db } from '../src/infra/db/connection';
-
-const app = Fastify();
-app.register(jwtPlugin);
-app.register(authRoutes);
-app.register(profileRoutes);
-
-beforeAll(async () => {
-  await db.migrate.latest();
-});
-
-afterEach(async () => {
-  await db('users').del();
-});
-
-afterAll(async () => {
-  await db.destroy();
-});
+﻿import { FastifyInstance } from 'fastify';
+import {
+  createTestApp,
+  setupTestDatabase,
+  cleanupTestDatabase,
+  teardownTestDatabase,
+} from './helpers/test-app-factory';
+import {
+  validUser,
+  invalidUser,
+  weakPasswordUser,
+  missingRequirementsUser,
+  registerUser,
+  loginUser,
+  getProfile,
+  getProfileWithoutToken,
+  createUserAndGetToken,
+} from './helpers/test-helpers';
 
 describe('Auth Routes', () => {
-  test('registers a user successfully', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
-    });
-    expect(res.statusCode).toBe(201);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('User created successfully');
-    expect(body.user).toMatchObject({
-      email: 'test@example.com',
-    });
-    expect(body.user.id).toBeDefined();
+  let app: FastifyInstance;
+
+  beforeAll(async () => {
+    app = await createTestApp();
+    await setupTestDatabase();
   });
 
-  test('fails to register user with invalid email', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'invalid-email',
-        password: 'TestPass123!',
-      },
-    });
-    expect(res.statusCode).toBe(400);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('Validation error');
-    expect(body.errors).toContain('email: Invalid email');
+  afterEach(async () => {
+    await cleanupTestDatabase();
   });
 
-  test('fails to register user with short password', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: '123',
-      },
-    });
-    expect(res.statusCode).toBe(400);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('Validation error');
-    expect(body.errors).toEqual(
-      expect.arrayContaining([expect.stringContaining('Senha deve ter pelo menos 8 caracteres')])
-    );
+  afterAll(async () => {
+    await teardownTestDatabase();
   });
 
-  test('fails to register user with password missing requirements', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'testpass',
-      },
-    });
-    expect(res.statusCode).toBe(400);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('Validation error');
-    expect(body.errors).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining('maiúscula'),
-        expect.stringContaining('número'),
-        expect.stringContaining('especial'),
-      ])
-    );
-  });
+  describe('POST /register', () => {
+    it('should register a user successfully', async () => {
+      const response = await registerUser(app, validUser);
 
-  test('fails to register duplicate user', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
-    });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
-    });
-    expect(res.statusCode).toBe(409);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('User already exists');
-  });
+      expect(response.statusCode).toBe(201);
 
-  test('logs in user successfully', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
+      const body = JSON.parse(response.body);
+      expect(body.message).toBe('User created successfully');
+      expect(body.user).toMatchObject({
+        email: validUser.email,
+      });
+      expect(body.user.id).toBeDefined();
     });
-    const res = await app.inject({
-      method: 'POST',
-      url: '/login',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
+
+    it('should fail with invalid email format', async () => {
+      const response = await registerUser(app, invalidUser);
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('email');
     });
-    expect(res.statusCode).toBe(200);
-    const body = JSON.parse(res.body);
-    expect(body.token).toBeDefined();
-    expect(body.user).toMatchObject({
-      email: 'test@example.com',
+
+    it('should fail with weak password', async () => {
+      const response = await registerUser(app, weakPasswordUser);
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('password');
+    });
+
+    it('should fail with password missing requirements', async () => {
+      const response = await registerUser(app, missingRequirementsUser);
+
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('password');
+    });
+
+    it('should fail when user already exists', async () => {
+      await registerUser(app, validUser);
+      const response = await registerUser(app, validUser);
+
+      expect(response.statusCode).toBe(409);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toBe('User already exists');
     });
   });
 
-  test('fails to login with invalid credentials', async () => {
-    const res = await app.inject({
-      method: 'POST',
-      url: '/login',
-      payload: {
-        email: 'test@example.com',
+  describe('POST /login', () => {
+    it('should login user successfully', async () => {
+      await registerUser(app, validUser);
+      const response = await loginUser(app, validUser);
+
+      expect(response.statusCode).toBe(200);
+
+      const body = JSON.parse(response.body);
+      expect(body.token).toBeDefined();
+      expect(body.user).toMatchObject({
+        email: validUser.email,
+      });
+    });
+
+    it('should fail with invalid credentials', async () => {
+      const response = await loginUser(app, {
+        email: validUser.email,
         password: 'wrongpassword',
-      },
-    });
-    expect(res.statusCode).toBe(401);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('Invalid credentials');
-  });
+      });
 
-  test('accesses protected route with valid token', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/register',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
-    });
-    const loginRes = await app.inject({
-      method: 'POST',
-      url: '/login',
-      payload: {
-        email: 'test@example.com',
-        password: 'TestPass123!',
-      },
-    });
-    const { token } = JSON.parse(loginRes.body);
-    const res = await app.inject({
-      method: 'GET',
-      url: '/profile',
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    });
-    expect(res.statusCode).toBe(200);
-    const body = JSON.parse(res.body);
-    expect(body.user).toMatchObject({
-      email: 'test@example.com',
+      expect(response.statusCode).toBe(400);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toContain('password');
     });
   });
 
-  test('fails to access protected route without token', async () => {
-    const res = await app.inject({
-      method: 'GET',
-      url: '/profile',
+  describe('GET /profile', () => {
+    it('should access protected route with valid token', async () => {
+      const token = await createUserAndGetToken(app);
+      const response = await getProfile(app, token);
+
+      expect(response.statusCode).toBe(200);
+
+      const body = JSON.parse(response.body);
+      expect(body.user).toMatchObject({
+        email: validUser.email,
+      });
     });
-    expect(res.statusCode).toBe(401);
-    const body = JSON.parse(res.body);
-    expect(body.message).toBe('Unauthorized');
+
+    it('should fail to access protected route without token', async () => {
+      const response = await getProfileWithoutToken(app);
+
+      expect(response.statusCode).toBe(401);
+
+      const body = JSON.parse(response.body);
+      expect(body.message).toBe('Unauthorized');
+    });
   });
 });

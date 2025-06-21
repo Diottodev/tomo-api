@@ -4,11 +4,13 @@ import { profileRoutes } from './routes/profile';
 import jwtPlugin from '../plugins/jwt';
 import { docsRoutes } from './routes/docs';
 import { env } from '../../env';
+import { setupErrorHandler } from '../../utils/error-handler';
 
 const app = Fastify();
 
 async function start() {
   try {
+    setupErrorHandler(app);
     app.register(jwtPlugin);
     app.register(authRoutes);
     app.register(profileRoutes);
@@ -24,7 +26,6 @@ async function start() {
         },
       };
     });
-
     app.listen({ port: env.port || 8080 }, (err) => {
       if (err) {
         console.error(err);

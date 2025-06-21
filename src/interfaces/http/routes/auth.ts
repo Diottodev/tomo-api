@@ -4,14 +4,15 @@ import { authenticateUser } from '../../../app/use-cases/authenticate-user';
 import { authSchema } from '../../../schemas/auth';
 import { ZodError } from 'zod';
 import { ApiResponse } from '../../../utils/api-response';
+import { authSchemas } from '../../../utils/schemas';
 
 export async function authRoutes(app: FastifyInstance) {
   app.post('/register', {
+    schema: authSchemas.register,
     handler: async (request, reply) => {
       try {
         const userData = authSchema.parse(request.body);
         const user = await registerUser(userData);
-        
         return ApiResponse.success(reply, { user }, 'User created successfully', 201);
       } catch (error) {
         if (error instanceof ZodError) {
@@ -20,7 +21,9 @@ export async function authRoutes(app: FastifyInstance) {
             const message = e.message;
             return `${field}: ${message}`;
           });
-
+          if (error instanceof Error && error.message === 'User already exists') {
+            return ApiResponse.conflict(reply, 'User already exists');
+          }
           return ApiResponse.validationError(reply, formattedErrors, {
             passwordRequirements: [
               'Minimum 8 characters',
@@ -31,28 +34,23 @@ export async function authRoutes(app: FastifyInstance) {
             ],
           });
         }
-        if (error instanceof Error && error.message === 'User already exists') {
-          return ApiResponse.conflict(reply, 'User already exists');
-        }
-        
         console.error('Register route error:', error);
         return ApiResponse.internalError(reply);
       }
     },
   });
   app.post('/login', {
+    schema: authSchemas.login,
     handler: async (request, reply) => {
       try {
         const userData = authSchema.parse(request.body);
         const user = await authenticateUser(userData);
-        
         if (!user) {
           return ApiResponse.unauthorized(
             reply,
             'Invalid credentials. Please check your email and password.'
           );
         }
-        
         const token = app.jwt.sign({ sub: user.id });
         return ApiResponse.success(reply, { token, user });
       } catch (error) {
@@ -62,10 +60,8 @@ export async function authRoutes(app: FastifyInstance) {
             const message = e.message;
             return `${field}: ${message}`;
           });
-
           return ApiResponse.validationError(reply, formattedErrors);
         }
-        
         console.error('Login route error:', error);
         return ApiResponse.internalError(reply);
       }

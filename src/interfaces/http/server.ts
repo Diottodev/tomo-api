@@ -1,41 +1,28 @@
 import Fastify from 'fastify';
 import { authRoutes } from './routes/auth';
+import { profileRoutes } from './routes/profile';
 import jwtPlugin from '../plugins/jwt';
+import { docsRoutes } from './routes/docs';
 import { env } from '../../env';
-import swagger from '@fastify/swagger';
-import swaggerUi from '@fastify/swagger-ui';
 
 const app = Fastify();
 
 async function start() {
   try {
-    app.register(swagger, {
-      swagger: {
-        info: {
-          title: 'Tomo Auth API',
-          description: 'API for authentication with Fastify, JWT, and PostgreSQL',
-          version: '1.0.0',
-        },
-        consumes: ['application/json'],
-        produces: ['application/json'],
-      },
-    });
-
-    app.register(swaggerUi, {
-      routePrefix: '/docs',
-      uiConfig: {
-        docExpansion: 'full',
-        deepLinking: false,
-      },
-      staticCSP: true,
-      transformStaticCSP: (header) => header,
-    });
-
     app.register(jwtPlugin);
     app.register(authRoutes);
-
+    app.register(profileRoutes);
+    app.register(docsRoutes);
     app.get('/', async () => {
-      return 'Welcome to the Tomo Auth API!';
+      return {
+        message: 'Welcome to the Tomo API!',
+        documentation: `http://localhost:${env.port}/docs`,
+        endpoints: {
+          register: 'POST /register',
+          login: 'POST /login',
+          profile: 'GET /profile (requires authentication)',
+        },
+      };
     });
 
     app.listen({ port: env.port || 8080 }, (err) => {
@@ -44,9 +31,8 @@ async function start() {
         process.exit(1);
       }
       console.log(`HTTP server running on http://localhost:${env.port}`);
-      console.log(`Swagger docs available at http://localhost:${env.port}/docs`);
+      console.log(`📚 Documentation available at http://localhost:${env.port}/docs`);
     });
-    console.log(`HTTP server running on port ${env.port}`);
   } catch (err) {
     console.error(err);
     process.exit(1);

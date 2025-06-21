@@ -1,0 +1,9 @@
+{
+  "low": true,
+  "moderate": true,
+  "high": false,
+  "critical": false,
+  "report-type": "important",
+  "allowlist": [],
+  "skip-dev": true
+}

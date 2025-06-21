@@ -11,8 +11,21 @@ const config: Config = {
     '!src/interfaces/http/server.ts', // Exclude server entry point
   ],
   coverageReporters: ['text', 'lcov', 'html'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  testTimeout: 10000,
+  maxWorkers: '50%',
   clearMocks: true,
   restoreMocks: true,
+  verbose: true,
+  bail: false,
+  errorOnDeprecated: true,
 };
 
 export default config;

@@ -20,7 +20,7 @@ const config: Config = {
     },
   },
   testTimeout: 10000,
-  maxWorkers: '50%',
+  maxWorkers: 1, // Run tests sequentially to avoid database race conditions
   clearMocks: true,
   restoreMocks: true,
   verbose: true,

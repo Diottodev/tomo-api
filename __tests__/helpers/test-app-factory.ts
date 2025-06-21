@@ -17,13 +17,38 @@ export async function createTestApp(): Promise<FastifyInstance> {
 }
 
 export async function setupTestDatabase(): Promise<void> {
-  await testDb.migrate.latest();
+  try {
+    // Ensure migrations are run
+    await testDb.migrate.latest();
+    
+    // Verify the users table exists
+    const hasUsersTable = await testDb.schema.hasTable('users');
+    if (!hasUsersTable) {
+      throw new Error('Users table not created after migration');
+    }
+  } catch (error) {
+    console.error('Error setting up test database:', error);
+    throw error;
+  }
 }
 
 export async function cleanupTestDatabase(): Promise<void> {
-  await testDb('users').del();
+  try {
+    // Only clean if table exists
+    const hasUsersTable = await testDb.schema.hasTable('users');
+    if (hasUsersTable) {
+      await testDb('users').del();
+    }
+  } catch (error) {
+    console.error('Error cleaning up test database:', error);
+    // Don't throw here to avoid cascading failures
+  }
 }
 
 export async function teardownTestDatabase(): Promise<void> {
-  await testDb.destroy();
+  try {
+    await testDb.destroy();
+  } catch (error) {
+    console.error('Error tearing down test database:', error);
+  }
 }

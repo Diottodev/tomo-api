@@ -1,10 +1,11 @@
 ﻿import type { FastifyRequest, FastifyReply } from 'fastify';
+import { ApiResponse } from '../../../utils/api-response';
 
 export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
   try {
     await request.jwtVerify();
   } catch {
-    reply.status(401).send({ message: 'Unauthorized' });
+    return ApiResponse.unauthorized(reply);
   }
 }
 

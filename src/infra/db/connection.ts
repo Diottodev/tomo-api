@@ -11,7 +11,7 @@ import { env } from '../../env';
 // Determine database client based on DATABASE_URL
 const getDatabaseConfig = () => {
   const databaseUrl = env.databaseUrl;
-  
+
   // For test environment or SQLite URLs
   if (
     process.env.NODE_ENV === 'test' ||
@@ -27,7 +27,7 @@ const getDatabaseConfig = () => {
       },
     };
   }
-  
+
   // For production/development PostgreSQL
   return {
     client: 'pg',

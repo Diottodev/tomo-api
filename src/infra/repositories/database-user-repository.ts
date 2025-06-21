@@ -2,10 +2,16 @@
 import { UserEntity } from '../../domain/entities/user';
 import { Email } from '../../domain/value-objects/email';
 import { db } from '../db/connection';
+import type { Knex } from 'knex';
 
 export class DatabaseUserRepository implements UserRepository {
+  private dbInstance: Knex;
+
+  constructor(dbInstance?: Knex) {
+    this.dbInstance = dbInstance || db;
+  }
   async findByEmail(email: Email): Promise<UserEntity | null> {
-    const userData = await db('users').where({ email: email.getValue() }).first();
+    const userData = await this.dbInstance('users').where({ email: email.getValue() }).first();
     if (!userData) {
       return null;
     }
@@ -19,7 +25,7 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   async findById(id: string): Promise<UserEntity | null> {
-    const userData = await db('users').where({ id }).first();
+    const userData = await this.dbInstance('users').where({ id }).first();
     if (!userData) {
       return null;
     }
@@ -33,7 +39,7 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   async save(user: UserEntity): Promise<void> {
-    await db('users').insert({
+    await this.dbInstance('users').insert({
       id: user.getId(),
       email: user.getEmail(),
       password_hash: user.getPasswordHash(),
@@ -42,7 +48,10 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   async exists(email: Email): Promise<boolean> {
-    const count = await db('users').where({ email: email.getValue() }).count('id as total').first();
+    const count = await this.dbInstance('users')
+      .where({ email: email.getValue() })
+      .count('id as total')
+      .first();
     return Number(count?.total) > 0;
   }
 }

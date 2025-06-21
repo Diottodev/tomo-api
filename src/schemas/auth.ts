@@ -1,13 +1,14 @@
 ﻿import { z } from 'zod';
 
 export const authSchema = z.object({
-  email: z.string().email('Email deve ser válido'),
+  email: z.string().email('Email must be valid'),
   password: z
     .string()
-    .min(8, 'Senha deve ter pelo menos 8 caracteres')
-    .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
-    .regex(/[0-9]/, 'Senha deve conter pelo menos um número')
-    .regex(/[^A-Za-z0-9]/, 'Senha deve conter pelo menos um caractere especial'),
+    .min(8, 'Password must be at least 8 characters long')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter (A-Z)')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter (a-z)')
+    .regex(/[0-9]/, 'Password must contain at least one number (0-9)')
+    .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character (!@#$%^&*)'),
 });
 
 export const loginResponseSchema = z.object({
